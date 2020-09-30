@@ -281,6 +281,7 @@ export default class XGraph {
       }
       if (this.type === 'csv') {
         try {
+          console.log(this.graph, this.csvGraph);
           Drawio.importCsv(this.graph, this.csvGraph);
           this.refresh();
         } catch (error) {

@@ -155,7 +155,7 @@ export class FlowchartHandler {
     let result = FlowchartHandler.defaultXml;
     if (!result) {
       const url = `${$GF.plugin.getRootPath()}${$GF.CONSTANTS.CONF_FILE_DEFAULTDIO}`;
-      result = $GF.utils.$loadFile(url);
+      result = $GF.utils.$loadFile(url, {});
     }
     return result;
   }
@@ -171,7 +171,7 @@ export class FlowchartHandler {
     let result = FlowchartHandler.defaultCsv;
     if (!result) {
       const url = `${$GF.plugin.getRootPath()}${$GF.CONSTANTS.CONF_FILE_DEFAULTCSV}`;
-      result = $GF.utils.$loadFile(url);
+      result = $GF.utils.$loadFile(url, {});
     }
     return result;
   }

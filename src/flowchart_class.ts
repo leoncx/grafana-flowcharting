@@ -72,6 +72,10 @@ export class Flowchart {
     }
     if (!!obj.url) {
       this.data.url = obj.url;
+      this.data.remoteAuthType = obj.remoteAuthType;
+      this.data.remoteAuthBasicUsername = obj.remoteAuthBasicUsername;
+      this.data.remoteAuthBasicPassword = obj.remoteAuthBasicPassword;
+      this.data.remoteAuthBearerToken = obj.remoteAuthBearerToken;
     }
     if (!!obj.zoom) {
       this.data.zoom = obj.zoom;
@@ -118,6 +122,10 @@ export class Flowchart {
       download: false,
       type: 'xml',
       url: 'http://<YourUrl>/<Your XML/drawio file/api>',
+      remoteAuthType: 'none',
+      remoteAuthBasicUsername: '',
+      remoteAuthBasicPassword: '',
+      remoteAuthBearerToken: '',
       zoom: '100%',
       center: true,
       scale: true,
@@ -590,7 +598,7 @@ export class Flowchart {
     if (this.data.download) {
       const url = this.templateSrv.replaceWithText(this.data.url);
       $GF.message.setMessage(`Loading content definition for ${this.data.name}`, 'info');
-      content = this.loadContent(url);
+      content = this.loadContent(url, this.data);
       $GF.message.clearMessage();
       if (content !== null) {
         if (replaceVarBool) {
@@ -628,8 +636,8 @@ export class Flowchart {
    * @returns
    * @memberof Flowchart
    */
-  loadContent(url: string): string | null {
-    return $GF.utils.$loadFile(url);
+  loadContent(url: string, options: any): string | null {
+    return $GF.utils.$loadFile(url, options);
   }
 
   renameId(oldId: string, newId: string): this {

@@ -798,8 +798,8 @@ export class $GF {
     // getStepColors: (colorStart: string, colorEnd: string, colorCount: number) => string[];
     evalIt: (code: string) => string;
     loadFile: (fname: string) => string;
-    $loadFile: (fname: string) => string;
-    $evalFile: (fname: string) => void;
+    $loadFile: (fname: string, options: any) => string;
+    $evalFile: (fname: string, options: any) => void;
     evalRaw: (code: string) => void;
     addScript: (src: string) => void;
   } = require('./utils_raw');
@@ -1020,6 +1020,7 @@ export class $GF {
         const filePath = `${contextroot}/${fileName}`;
         if (!!window.fetch) {
           // exécuter ma requête fetch ici
+          console.log('Starting request global fetch');
           fetch(filePath)
             .then(response => {
               if (response.ok) {

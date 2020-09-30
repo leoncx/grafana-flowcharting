@@ -338,6 +338,10 @@ declare module gf {
     download: boolean;
     type: gf.TSourceTypeKeys;
     url: string;
+    remoteAuthType: string;
+    remoteAuthBasicUsername: string;
+    remoteAuthBasicPassword: string;
+    remoteAuthBearerToken: string;
     zoom: string;
     center: boolean;
     scale: boolean;

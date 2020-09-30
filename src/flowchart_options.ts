@@ -4,6 +4,8 @@ import XGraph from 'graph_class';
 import { Flowchart } from 'flowchart_class';
 import { $GF } from 'globals_class';
 
+import $ from 'jquery';
+
 export class FlowchartOptionsCtrl {
   $scope: gf.TIFlowchartOptionsScope;
   ctrl: any; //TODO: redefine any
@@ -142,48 +144,58 @@ export class FlowchartOptionsCtrl {
     this.currentFlowchart = this.flowchartHandler.setCurrentFlowchart(this.newName);
   }
 
-  checkUrl_onSourceChange(url: string): boolean {
+  checkUrl_onSourceChange(data: gf.TFlowchartData): boolean {
     this.errorDownloadFlag = false;
     // this.errorDownloadMsg = '';
-    const init: RequestInit = { method: 'GET', mode: 'cors', cache: 'default' };
+    let response;
     try {
-      url = this.ctrl.templateSrv.replaceWithText(url);
-      fetch(url, init)
-        .then(response => {
-          if (!(response.status >= 200 && response.status <= 299)) {
-            this.errorSourceFlag = true;
-            // this.errorDownloadMsg = `Error ${response.status} : ${response.statusText}`;
-            $GF.message.setMessage(`Error ${response.status} : ${response.statusText}`, 'error');
-            this.$scope.$applyAsync();
-          } else {
-            response.text().then(text => {
-              const fc = this.flowchartHandler.getCurrentFlowchart();
-              if (fc && fc.data.type === 'xml') {
-                const bool = XGraph.isValidXml(text);
-                this.errorSourceFlag = !bool;
-                if (this.errorSourceFlag) {
-                  $GF.message.setMessage('Response is an invalid Xml definition', 'error');
-                  $GF.log.error('Response is an invalid Xml definition');
-                  // this.errorSourceMsg = 'Response is an invalid Xml definition';
-                } else {
-                  $GF.message.clearMessage();
-                  // this.errorDownloadMsg = '';
-                  this.onSourceChange();
-                }
-              } else {
-                // this.errorDownloadMsg = '';
-                this.onSourceChange();
-              }
-              this.$scope.$applyAsync();
-            });
-          }
-        })
-        .catch(error => {
-          this.errorSourceFlag = true;
-          // this.errorDownloadMsg = `Error : ${error}`;
-          $GF.message.setMessage(`Error : ${error}`, 'error');
+      const url = this.ctrl.templateSrv.replaceWithText(data.url);
+      const ajaxOptions = {
+        method: 'GET',
+        url: url,
+        async: false,
+        success: data => (response = data),
+        error: error => {
+          this.errorDownloadFlag = true;
+          $GF.message.setMessage(`Error : ${error.statusText}`, 'error');
           this.$scope.$applyAsync();
-        });
+        },
+        beforeSend: xhr => {},
+      };
+      let authString;
+      if (data.remoteAuthType !== 'none') {
+        if (data.remoteAuthType === 'basic') {
+          authString = `Basic ${btoa(`${data.remoteAuthBasicUsername}:${data.remoteAuthBasicPassword}`)}`;
+        } else {
+          authString = `Bearer ${data.remoteAuthBearerToken}`;
+        }
+        ajaxOptions.beforeSend = xhr => {
+          xhr.setRequestHeader('Authorization', authString);
+        };
+      }
+      $.ajax(ajaxOptions);
+      if (this.errorDownloadFlag) {
+        return true;
+      }
+      const text = response;
+      const fc = this.flowchartHandler.getCurrentFlowchart();
+      if (fc && fc.data.type === 'xml') {
+        const bool = XGraph.isValidXml(text);
+        this.errorSourceFlag = !bool;
+        if (this.errorSourceFlag) {
+          $GF.message.setMessage('Response is an invalid Xml definition', 'error');
+          $GF.log.error('Response is an invalid Xml definition');
+          // this.errorSourceMsg = 'Response is an invalid Xml definition';
+        } else {
+          $GF.message.clearMessage();
+          // this.errorDownloadMsg = '';
+          this.onSourceChange();
+        }
+      } else {
+        // this.errorDownloadMsg = '';
+        this.onSourceChange();
+      }
+      this.$scope.$applyAsync();
     } catch (error) {
       this.errorDownloadFlag = true;
       $GF.message.setMessage('Error when call url', 'error');
